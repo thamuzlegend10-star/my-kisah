@@ -492,6 +492,10 @@
 </head>
 <body>
 
+<audio id="bgAudio" loop preload="auto">
+  <source src="ambient.mp3" type="audio/mpeg">
+</audio>
+
 <div class="motes" id="motes"></div>
 
 <div class="intro-overlay" id="introOverlay">
@@ -550,6 +554,7 @@
     <div class="reader-topbar">
       <span class="breadcrumb" id="breadcrumb">regrets / chapter one</span>
       <div class="controls">
+        <button class="ctrl-btn" id="soundBtn">sound: on</button>
         <button class="ctrl-btn" id="replayBtn">replay</button>
         <button class="ctrl-btn" id="skipBtn">skip</button>
       </div>
@@ -689,9 +694,36 @@
     });
   });
 
+  const bgAudio = document.getElementById('bgAudio');
+  const soundBtn = document.getElementById('soundBtn');
+  const AMBIENT_TARGET_VOLUME = 0.35;
+  const FADE_IN_MS = 2500;
+
+  function fadeInAudio(audio, target, duration){
+    audio.volume = 0;
+    const steps = 30;
+    const stepTime = duration / steps;
+    let count = 0;
+    const iv = setInterval(() => {
+      count++;
+      audio.volume = Math.min(target, (target * count) / steps);
+      if (count >= steps) clearInterval(iv);
+    }, stepTime);
+  }
+
   document.getElementById('beginBtn').addEventListener('click', () => {
     document.getElementById('introOverlay').classList.add('hidden');
     loadChapter(0);
+
+    bgAudio.volume = 0;
+    bgAudio.play()
+      .then(() => fadeInAudio(bgAudio, AMBIENT_TARGET_VOLUME, FADE_IN_MS))
+      .catch(() => { /* autoplay blocked; user can still hit sound toggle later */ });
+  });
+
+  soundBtn.addEventListener('click', () => {
+    bgAudio.muted = !bgAudio.muted;
+    soundBtn.textContent = bgAudio.muted ? 'sound: off' : 'sound: on';
   });
 
   (function spawnMotes(){
