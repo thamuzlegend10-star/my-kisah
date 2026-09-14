@@ -524,7 +524,7 @@
     <ul class="chapters" id="chapterList">
       <li class="chapter-item active" data-ch="0">
         <span class="chapter-num">I</span>
-        <span class="chapter-name">The Last Lamplighter</span>
+        <span class="chapter-name">The First Girl</span>
       </li>
       <li class="chapter-item" data-ch="1">
         <span class="chapter-num">II</span>
@@ -555,14 +555,12 @@
       <span class="breadcrumb" id="breadcrumb">regrets / chapter one</span>
       <div class="controls">
         <button class="ctrl-btn" id="soundBtn">sound: on</button>
-        <button class="ctrl-btn" id="replayBtn">replay</button>
-        <button class="ctrl-btn" id="skipBtn">skip</button>
       </div>
     </div>
 
     <div class="story-wrap fade-in" id="storyWrap">
       <p class="chapter-eyebrow" id="chapterEyebrow">chapter one</p>
-      <h1 class="story-title" id="chapterTitle">The Last Lamplighter</h1>
+      <h1 class="story-title" id="chapterTitle">The First Girl</h1>
       <div class="story-text" id="storyText"></div>
     </div>
 
@@ -577,9 +575,169 @@
 <script>
   const chapters = [
     {
-      title: "The Last Lamplighter",
+      title: "The First Girl",
       eyebrow: "chapter one",
-      text: "Every night at the same hour, Mira walked the length of Cinder Row and lit the seven lamps no one else remembered were there.\n\nThe town had switched to electric decades ago. The wires ran overhead like black stitches across a wound the sky never quite closed. But the old lamps stayed, rusted and blind, and she lit them anyway, because her grandmother had, and because some doors should never be the last to close.\n\nTonight the seventh lamp would not take the flame."
+      text: `There was a time when my life at Global Prima School felt completely ordinary.
+
+I wasn't exactly the kind of student teachers would remember for good reasons.
+
+I was rude, lazy, and rarely eager to take responsibility. Whenever I did something wrong, admitting it was usually the last thing on my mind. I had a habit of avoiding problems rather than facing them.
+
+Academically, I wasn't much better. I wasn't one of the students who stood out because of their grades or dedication. Most of the time, I simply did what I needed to do and waited for the day to end.
+
+Then there was a girl named Nathalia.
+
+I don't remember exactly when we first met. Somehow, she just became part of my everyday school life.
+
+At first, she was simply my classmate.
+
+We studied together, sat beside each other, talked occasionally, and went through the usual routines of elementary school. Nothing about our friendship seemed extraordinary.
+
+But Nathalia was kind to me.
+
+So were her parents.
+
+At the time, I didn't think much of it. Their kindness was simply something I was fortunate enough to receive.
+
+Then, during a Buddhist religion lesson, something unexpected happened.
+
+Nathalia was sitting beside me when the teacher suddenly asked her a question.
+
+"Do you like him?"
+
+I remember being caught off guard.
+
+Even now, I don't know whether Nathalia fully understood the question. Maybe she wasn't paying attention. Maybe she misunderstood what the teacher meant.
+
+But she answered.
+
+"Yes."
+
+That single word left me completely speechless.
+
+I didn't suddenly fall in love with her. It wasn't anything that dramatic.
+
+I was simply curious.
+
+I'd never really thought about someone liking me that way before. I didn't know what I was supposed to say or how I was supposed to react.
+
+Still, I felt something strange in my chest.
+
+A feeling I couldn't name.
+
+And then the lesson continued as if nothing had happened.
+
+For me, that was the beginning of something I didn't understand yet.
+
+Not love.
+
+Not a relationship.
+
+Just curiosity.
+
+Then came the plastic bottle.
+
+One afternoon, my friends and I wanted to play football, but we didn't have a ball.
+
+So we used what we had.
+
+A plastic bottle.
+
+It was a terrible substitute for a football, but none of us cared. We kicked it around, chased after it, and played anyway.
+
+Then I kicked it.
+
+I wasn't aiming at anyone.
+
+But the bottle went in the wrong direction.
+
+It hit Nathalia in the head.
+
+She started crying.
+
+And I froze.
+
+I had absolutely no idea what to do.
+
+I didn't know how to comfort her. I didn't know what to say. I just stood there, staring at her while my mind went completely blank.
+
+And then came the instinct I knew too well.
+
+Run.
+
+Avoid it.
+
+Pretend it wasn't my fault.
+
+Except this time, I couldn't really escape what had happened.
+
+Nathalia was crying because of something I had done.
+
+Even though I hadn't meant to hurt her, I knew I was responsible.
+
+She had always treated me well, and yet I had just caused her pain through my own carelessness.
+
+I wish I could say I handled it perfectly.
+
+I didn't.
+
+I was still the same kid who struggled to admit when he was wrong.
+
+But the moment stayed with me.
+
+Not long after that came another memory—one that was much happier.
+
+Nathalia had her birthday celebration at school.
+
+The classroom felt different that day. There was more excitement than usual, more laughter, and food spread around for everyone to enjoy.
+
+Her parents had prepared things for the celebration, and I remember being happy just to be there.
+
+Then I saw the noodles.
+
+That was probably the part I cared about most.
+
+The smell filled the room, and I didn't waste much time before getting myself a portion.
+
+I remember eating them while everyone talked around me.
+
+The room was noisy in the way classrooms become when everyone is excited. People were laughing, talking over each other, moving around, enjoying the celebration.
+
+And there I was, happily eating noodles at Nathalia's birthday.
+
+It wasn't some grand moment.
+
+It was just nice.
+
+Her parents had welcomed me.
+
+Nathalia had treated me kindly.
+
+And for that day, everything felt simple.
+
+Looking back, I don't remember the exact conversations we had.
+
+I don't remember every detail of the celebration.
+
+But somehow, I remember the noodles.
+
+Maybe that's why the memory stayed.
+
+Some memories survive not because they were extraordinary, but because of how they made you feel when you were living them.
+
+At that point, Nathalia was still just a girl who had entered my life quietly.
+
+A classmate who was kind to me.
+
+A girl whose parents treated me well.
+
+Someone who had made me curious with a single answer during a religion lesson.
+
+I didn't know where any of it was going.
+
+I didn't know how much closer we would eventually become.
+
+I certainly didn't know that these small memories would one day become the earliest pages of a story I would call Regrets.`
     },
     {
       title: "What the Ash Remembers",
@@ -611,20 +769,14 @@
     storyText.innerHTML = '';
 
     const paragraphs = text.split('\n\n');
-    let pIndex = 0;
-
-    function showNextParagraph(){
-      if (pIndex >= paragraphs.length) return;
+    paragraphs.forEach((para, idx) => {
       const pEl = document.createElement('p');
       pEl.className = 'story-para';
-      pEl.style.margin = pIndex === 0 ? '0 0 1.4em 0' : '1.4em 0';
-      pEl.textContent = paragraphs[pIndex];
+      pEl.style.margin = idx === 0 ? '0 0 1.4em 0' : '1.4em 0';
+      pEl.style.animationDelay = (idx * 0.12) + 's';
+      pEl.textContent = para;
       storyText.appendChild(pEl);
-      pIndex++;
-      typing = setTimeout(showNextParagraph, 1000);
-    }
-
-    showNextParagraph();
+    });
   }
 
   function loadChapter(idx){
@@ -651,19 +803,6 @@
 
     typeText(ch.text);
   }
-
-  document.getElementById('replayBtn').addEventListener('click', () => typeText(chapters[current].text));
-  document.getElementById('skipBtn').addEventListener('click', () => {
-    clearTimeout(typing);
-    storyText.innerHTML = '';
-    chapters[current].text.split('\n\n').forEach((para, idx) => {
-      const pEl = document.createElement('p');
-      pEl.className = 'story-para';
-      pEl.style.margin = idx === 0 ? '0 0 1.4em 0' : '1.4em 0';
-      pEl.textContent = para;
-      storyText.appendChild(pEl);
-    });
-  });
 
   prevLink.addEventListener('click', () => { if (current > 0) loadChapter(current - 1); });
   nextLink.addEventListener('click', () => { if (current < chapters.length - 1) loadChapter(current + 1); });
