@@ -304,6 +304,13 @@
   .menu-toggle.open span:nth-child(2){ opacity:0; }
   .menu-toggle.open span:nth-child(3){ transform: translateY(-7.5px) rotate(-45deg); }
 
+  @media (max-width: 760px){
+    .menu-toggle.open{ left:auto; right:1.2rem; }
+  }
+  @media (max-width: 420px){
+    .menu-toggle.open{ right:0.8rem; }
+  }
+
   .toc-backdrop{
     display:none;
     position:fixed; inset:0;
