@@ -102,17 +102,12 @@
   .track{
     display:flex;
     height:100vh;
-    overflow-x:auto;
-    overflow-y:hidden;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width:none;
+    will-change: transform;
+    transition: transform 0.9s cubic-bezier(0.16,1,0.3,1);
   }
-  .track::-webkit-scrollbar{ display:none; }
 
   .quote-card{
     flex: 0 0 100vw;
-    scroll-snap-align: center;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -284,6 +279,10 @@
   </symbol>
 </svg>
 
+<audio id="bgAudio" loop preload="auto">
+  <source src="ambient.mp3" type="audio/mpeg">
+</audio>
+
 <div class="starfield">
   <div class="star-track" id="starTrack">
     <div class="star-tile" id="tile1"></div>
@@ -303,36 +302,36 @@
   <div class="quote-card">
     <div class="quote-inner">
       <p class="quote-mark">"</p>
-      <p class="quote-text">Some doors don't need a key. Just someone still willing to knock.</p>
-      <p class="quote-attr">regrets, i</p>
+      <p class="quote-text">I didn't fall for you all at once. I fell a little more every time you stayed.</p>
+      <p class="quote-attr">lesson, i</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
       <p class="quote-mark">"</p>
-      <p class="quote-text">I didn't lose you all at once. I lost you in the moments I chose to stay quiet.</p>
-      <p class="quote-attr">regrets, ii</p>
+      <p class="quote-text">You were never a chapter. You were the reason I kept turning pages.</p>
+      <p class="quote-attr">lesson, ii</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
       <p class="quote-mark">"</p>
-      <p class="quote-text">Memory is just regret that learned how to smile.</p>
-      <p class="quote-attr">regrets, iii</p>
+      <p class="quote-text">Some hearts don't need promises. They just need someone who keeps showing up.</p>
+      <p class="quote-attr">lesson, iii</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
       <p class="quote-mark">"</p>
-      <p class="quote-text">I keep rewriting the same goodbye, hoping one version finally lets me sleep.</p>
-      <p class="quote-attr">regrets, iv</p>
+      <p class="quote-text">Home was never a place. It was the sound of your voice on an ordinary evening.</p>
+      <p class="quote-attr">lesson, iv</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
       <p class="quote-mark">"</p>
-      <p class="quote-text">Some thoughts don't end. They just wait for the next quiet room to fill.</p>
-      <p class="quote-attr">regrets, v</p>
+      <p class="quote-text">If loving you was a lesson, I never wanted to graduate.</p>
+      <p class="quote-attr">lesson, v</p>
     </div>
   </div>
 </div>
@@ -431,27 +430,103 @@
   });
   const dots = Array.from(document.querySelectorAll('.dot'));
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const idx = cards.indexOf(entry.target);
-      if (entry.isIntersecting && entry.intersectionRatio > 0.6){
-        entry.target.classList.add('in-view');
-        dots.forEach(d => d.classList.remove('active'));
-        dots[idx].classList.add('active');
-      } else {
-        entry.target.classList.remove('in-view');
-      }
-    });
-  }, { root: track, threshold: [0, 0.6, 1] });
+  let currentIndex = 0;
+  let isLocked = false;
+  const LOCK_MS = 900;
 
-  cards.forEach(c => observer.observe(c));
+  function goToCard(index){
+    if (isLocked) return;
+    const clamped = Math.max(0, Math.min(cards.length - 1, index));
+    if (clamped === currentIndex) return;
 
-  function scrollByCard(dir){
-    track.scrollBy({ left: dir * track.clientWidth, behavior: 'smooth' });
+    isLocked = true;
+    currentIndex = clamped;
+
+    cards.forEach(c => c.classList.remove('in-view'));
+    track.style.transform = 'translateX(' + (-currentIndex * 100) + 'vw)';
+    dots.forEach(d => d.classList.remove('active'));
+    dots[currentIndex].classList.add('active');
+
+    setTimeout(() => {
+      cards[currentIndex].classList.add('in-view');
+    }, 250);
+
+    setTimeout(() => { isLocked = false; }, LOCK_MS);
   }
-  arrowLeft.addEventListener('click', () => scrollByCard(-1));
-  arrowRight.addEventListener('click', () => scrollByCard(1));
+
+  // reveal the first card on load
+  cards[0].classList.add('in-view');
+
+  arrowLeft.addEventListener('click', () => goToCard(currentIndex - 1));
+  arrowRight.addEventListener('click', () => goToCard(currentIndex + 1));
+
+  // one wheel "stroke" moves exactly one card — no skipping ahead
+  let wheelCooldown = false;
+  window.addEventListener('wheel', (e) => {
+    ensureAudioPlaying();
+    e.preventDefault();
+    if (wheelCooldown) return;
+    const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (Math.abs(delta) < 8) return;
+    wheelCooldown = true;
+    goToCard(currentIndex + (delta > 0 ? 1 : -1));
+    setTimeout(() => { wheelCooldown = false; }, LOCK_MS);
+  }, { passive: false });
+
+  // one swipe moves exactly one card
+  let touchStartX = null;
+  window.addEventListener('touchstart', (e) => {
+    ensureAudioPlaying();
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  window.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    touchStartX = null;
+    if (Math.abs(deltaX) < 40) return;
+    goToCard(currentIndex + (deltaX < 0 ? 1 : -1));
+  }, { passive: true });
+
+  window.addEventListener('keydown', (e) => {
+    ensureAudioPlaying();
+    if (e.key === 'ArrowRight') goToCard(currentIndex + 1);
+    if (e.key === 'ArrowLeft') goToCard(currentIndex - 1);
+  });
+
+  // ---------- background audio: autoplay + fade in ----------
+  const bgAudio = document.getElementById('bgAudio');
+  const AMBIENT_TARGET_VOLUME = 0.35;
+  const FADE_IN_MS = 2500;
+  let audioStarted = false;
+
+  function fadeInAudio(audio, target, duration){
+    audio.volume = 0;
+    const steps = 30;
+    const stepTime = duration / steps;
+    let count = 0;
+    const iv = setInterval(() => {
+      count++;
+      audio.volume = Math.min(target, (target * count) / steps);
+      if (count >= steps) clearInterval(iv);
+    }, stepTime);
+  }
+
+  function ensureAudioPlaying(){
+    if (audioStarted) return;
+    bgAudio.volume = 0;
+    bgAudio.play()
+      .then(() => { audioStarted = true; fadeInAudio(bgAudio, AMBIENT_TARGET_VOLUME, FADE_IN_MS); })
+      .catch(() => { /* still blocked; next interaction will retry */ });
+  }
+
+  // try immediately on page load (works if the browser allows it)
+  ensureAudioPlaying();
+  // most browsers require a gesture first — this catches the first click/tap/key anywhere
+  ['pointerdown', 'click'].forEach(evt => {
+    window.addEventListener(evt, ensureAudioPlaying, { once: true });
+  });
 </script>
+
 
 </body>
 </html>
