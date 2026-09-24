@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4ede0">
 <title>Lesson — Quotes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +14,8 @@
     --bg-1: #ece2cd;
     --bg-2: #e2d5b9;
     --paper: #372c22;
-    --paper-dim: #8a7a64;
+    /* darkened slightly from #8a7a64 so small text passes 4.5:1 contrast on the paper background */
+    --paper-dim: #6f6350;
     --ember: #a05a68;
     --ember-dim: #c9b9a0;
     --line: rgba(55,44,34,0.14);
@@ -26,8 +28,17 @@
     background: var(--bg-0);
     color: var(--paper);
     font-family: var(--serif);
-    height:100%;
     overflow:hidden;
+    /* stop pull-to-refresh and overscroll navigation from fighting the carousel */
+    overscroll-behavior: none;
+  }
+  html{ height:100%; }
+  body{
+    height:100vh;   /* fallback for older Android WebViews */
+    height:100dvh;  /* tracks the URL bar showing/hiding */
+    /* vertical pans and pinch-zoom stay native; horizontal pans go to our swipe code */
+    touch-action: pan-y pinch-zoom;
+    -webkit-tap-highlight-color: transparent;
   }
   body::before{
     content:"";
@@ -52,6 +63,7 @@
     width:200vw;
     height:100%;
     display:flex;
+    will-change: transform;
     animation: driftRight 60s linear infinite;
   }
   .star-tile{
@@ -93,7 +105,7 @@
   }
   .topbar-sub{
     font-family: var(--type);
-    font-size:0.65rem;
+    font-size:0.75rem;
     letter-spacing:0.08em;
     color: var(--paper-dim);
     margin:0.3rem 0 0 0;
@@ -102,6 +114,7 @@
   .track{
     display:flex;
     height:100vh;
+    height:100dvh;
     will-change: transform;
     transition: transform 0.9s cubic-bezier(0.16,1,0.3,1);
   }
@@ -113,6 +126,7 @@
     justify-content:center;
     padding: 4rem 2.2rem;
     position:relative;
+    will-change: transform;
   }
 
   .quote-inner{
@@ -188,7 +202,7 @@
   }
   .quote-attr{
     font-family: var(--type);
-    font-size:0.7rem;
+    font-size:0.8rem;
     letter-spacing:0.06em;
     color: var(--paper-dim);
   }
@@ -221,25 +235,25 @@
     bottom:3.4rem; left:0; right:0;
     text-align:center;
     font-family: var(--type);
-    font-size:0.62rem;
+    font-size:0.8rem;
     letter-spacing:0.06em;
     color: var(--paper-dim);
-    opacity:0.7;
+    opacity:0.9;
     z-index:10;
     pointer-events:none;
-    animation: hintFade 2.5s ease forwards;
+    animation: hintFade 4.5s ease forwards;
   }
+  .hint .touch{ display:none; }
   @keyframes hintFade{
-    0%, 60%{ opacity:0.7; }
+    0%, 65%{ opacity:0.9; }
     100%{ opacity:0; }
   }
 
-  .arrow{
+  /* shared look for round floating buttons */
+  .arrow,
+  .mute-btn{
     position:fixed;
-    top:50%;
-    transform: translateY(-50%);
     z-index:10;
-    width:42px; height:42px;
     background: rgba(244,237,224,0.85);
     border:none;
     border-radius:50%;
@@ -249,39 +263,108 @@
     align-items:center;
     justify-content:center;
     color: var(--paper);
+    padding:0;
+    transition: background 0.2s ease, color 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .arrow:hover,
+  .mute-btn:hover{ color: var(--ember); }
+  .arrow:focus-visible,
+  .mute-btn:focus-visible{
+    outline:2px solid var(--ember);
+    outline-offset:3px;
+  }
+
+  .arrow{
+    top:50%;
+    transform: translateY(-50%);
+    width:42px; height:42px;
     font-family: var(--serif);
     font-size:1.2rem;
-    transition: background 0.2s ease, color 0.2s ease;
   }
-  .arrow:hover{ color: var(--ember); }
   .arrow.left{ left:1.2rem; }
   .arrow.right{ right:1.2rem; }
+
+  .mute-btn{
+    top:1rem; right:1rem;
+    width:44px; height:44px;
+    z-index:11;
+  }
+  .mute-btn svg{ width:22px; height:22px; display:block; }
+  .mute-btn .icon-on{ display:none; }
+  .mute-btn.is-on .icon-on{ display:inline; }
+  .mute-btn.is-on .icon-off{ display:none; }
+
+  /* invisible tap zones: left/right halves of the screen (touch devices only) */
+  .tap-zone{
+    display:none;
+    position:fixed;
+    top:5.5rem;
+    bottom:5rem;
+    width:50%;
+    z-index:8;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tap-zone.left{ left:0; }
+  .tap-zone.right{ right:0; }
+  @media (hover:none) and (pointer:coarse){
+    .tap-zone{ display:block; }
+    .hint .touch{ display:inline; }
+    .hint .desk{ display:none; }
+  }
 
   @media (max-width:600px){
     .quote-inner{ max-width:340px; padding:2.2rem 1.7rem; }
     .quote-text{ font-size:1.15rem; line-height:1.55; }
     .quote-mark{ font-size:2rem; }
-    .arrow{ display:none; }
     .corner{ width:22px; height:22px; }
     .topbar{ padding:1.6rem 1.6rem 0.6rem; }
+    /* arrows stay, but move to the bottom corners beside the dots */
+    .arrow{
+      top:auto;
+      bottom: calc(2rem - 19px);
+      transform:none;
+      width:44px; height:44px;
+    }
+    .arrow.left{ left:1rem; }
+    .arrow.right{ right:1rem; }
   }
 
   @media (max-height:480px){
     .topbar{ padding:0.9rem 1.6rem 0.3rem; }
     .topbar-title{ font-size:1.15rem; }
-    .topbar-sub{ font-size:0.58rem; }
+    .topbar-sub{ font-size:0.7rem; }
     .quote-inner{ padding:1.6rem 1.8rem; }
     .quote-mark{ font-size:1.9rem; margin-bottom:0.2rem; }
     .quote-text{ font-size:1.15rem; line-height:1.4; margin-bottom:0.9rem; }
     .divider{ margin:0.2rem auto 0.9rem; }
     .progress{ bottom:0.8rem; }
     .hint{ bottom:2rem; }
+    .mute-btn{ top:0.6rem; right:0.8rem; }
+    .tap-zone{ top:3.5rem; bottom:3rem; }
+  }
+
+  /* motion sensitivity: no bouncing words, twinkling, panning, sliding or blur/zoom reveals */
+  @media (prefers-reduced-motion: reduce){
+    .star-track{ animation:none; transform:none; will-change:auto; }
+    .star{ animation:none; opacity:0.3; }
+    .quote-text .word{ animation:none; }
+    .track{ transition:none; }
+    .quote-inner,
+    .quote-card.in-view .quote-inner{
+      transform:none;
+      filter:none;
+      transition: opacity 0.5s ease;
+    }
+    .dot{ transition:none; }
   }
 </style>
 </head>
 <body>
 
-<svg style="display:none">
+<svg style="display:none" aria-hidden="true">
   <symbol id="cornerOrnament" viewBox="0 0 40 40">
     <path d="M2 38 C2 22 2 2 18 2 C26 2 32 5 32 12 C32 17 28 20 23 20 C20 20 17 18 17 15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
     <circle cx="17" cy="15" r="1.6" fill="currentColor"/>
@@ -309,8 +392,25 @@
   <p class="topbar-sub">tomorrow's justin</p>
 </div>
 
-<button class="arrow left" id="arrowLeft" aria-label="Previous">‹</button>
-<button class="arrow right" id="arrowRight" aria-label="Next">›</button>
+<button class="mute-btn" id="muteBtn" type="button" aria-label="Unmute sound">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 9.5v5h3.5l4.5 3.8V5.7L7.5 9.5H4z"/>
+    <g class="icon-on">
+      <path d="M15.5 9.2a4 4 0 0 1 0 5.6"/>
+      <path d="M18.2 6.6a8 8 0 0 1 0 10.8"/>
+    </g>
+    <g class="icon-off">
+      <path d="M16 9.5l5 5"/>
+      <path d="M21 9.5l-5 5"/>
+    </g>
+  </svg>
+</button>
+
+<button class="arrow left" id="arrowLeft" type="button" aria-label="Previous">‹</button>
+<button class="arrow right" id="arrowRight" type="button" aria-label="Next">›</button>
+
+<div class="tap-zone left" id="tapLeft" aria-hidden="true"></div>
+<div class="tap-zone right" id="tapRight" aria-hidden="true"></div>
 
 <div class="track" id="track">
   <div class="quote-card">
@@ -351,7 +451,7 @@
 </div>
 
 <div class="progress" id="progress"></div>
-<p class="hint">swipe or scroll →</p>
+<p class="hint"><span class="desk">swipe or scroll →</span><span class="touch">swipe or tap →</span></p>
 
 <script>
   (function spawnStars(){
@@ -364,8 +464,9 @@
       s.className = 'star' + (cfg.accent ? ' accent' : '');
       s.style.width = cfg.size + 'px';
       s.style.height = cfg.size + 'px';
-      s.style.top = cfg.top + 'vh';
-      s.style.left = cfg.left + 'vw';
+      // % of the tile (not vh/vw) so stars follow the dynamic viewport height
+      s.style.top = cfg.top + '%';
+      s.style.left = cfg.left + '%';
       s.style.setProperty('--min-op', cfg.minOp);
       s.style.setProperty('--max-op', cfg.maxOp);
       s.style.animationDuration = cfg.dur + 's';
@@ -415,6 +516,7 @@
       const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
       svg.setAttribute('class', 'corner ' + pos);
       svg.setAttribute('viewBox', '0 0 40 40');
+      svg.setAttribute('aria-hidden', 'true');
       const use = document.createElementNS('http://www.w3.org/2000/svg','use');
       use.setAttribute('href', '#cornerOrnament');
       svg.appendChild(use);
@@ -424,6 +526,7 @@
     const divider = document.createElementNS('http://www.w3.org/2000/svg','svg');
     divider.setAttribute('class', 'divider');
     divider.setAttribute('viewBox', '0 0 60 14');
+    divider.setAttribute('aria-hidden', 'true');
     const useD = document.createElementNS('http://www.w3.org/2000/svg','use');
     useD.setAttribute('href', '#dividerOrnament');
     divider.appendChild(useD);
@@ -436,6 +539,8 @@
   const progress = document.getElementById('progress');
   const arrowLeft = document.getElementById('arrowLeft');
   const arrowRight = document.getElementById('arrowRight');
+  const tapLeft = document.getElementById('tapLeft');
+  const tapRight = document.getElementById('tapRight');
 
   cards.forEach((_, i) => {
     const dot = document.createElement('span');
@@ -473,11 +578,13 @@
 
   arrowLeft.addEventListener('click', () => goToCard(currentIndex - 1));
   arrowRight.addEventListener('click', () => goToCard(currentIndex + 1));
+  tapLeft.addEventListener('click', () => goToCard(currentIndex - 1));
+  tapRight.addEventListener('click', () => goToCard(currentIndex + 1));
 
   // one wheel "stroke" moves exactly one card — no skipping ahead
   let wheelCooldown = false;
   window.addEventListener('wheel', (e) => {
-    ensureAudioPlaying();
+    onGesture(e);
     e.preventDefault();
     if (wheelCooldown) return;
     const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
@@ -488,56 +595,138 @@
   }, { passive: false });
 
   // one swipe moves exactly one card
+  // touchmove is non-passive so a horizontal swipe can cancel the browser's own gesture handling
+  const SWIPE_LOCK_PX = 8;   // movement before we decide horizontal vs vertical
+  const SWIPE_MIN_PX = 40;   // distance needed to change card
   let touchStartX = null;
+  let touchStartY = null;
+  let swipeAxis = null;      // 'x' | 'y' | null
+
+  function resetTouch(){ touchStartX = touchStartY = swipeAxis = null; }
+
   window.addEventListener('touchstart', (e) => {
-    ensureAudioPlaying();
+    if (e.touches.length !== 1){ resetTouch(); return; }   // ignore pinch-zoom
     touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    swipeAxis = null;
   }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (touchStartX === null) return;
+    if (e.touches.length !== 1){ resetTouch(); return; }
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (swipeAxis === null){
+      if (Math.abs(dx) < SWIPE_LOCK_PX && Math.abs(dy) < SWIPE_LOCK_PX) return;
+      swipeAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+    if (swipeAxis === 'x' && e.cancelable) e.preventDefault();
+  }, { passive: false });
+
   window.addEventListener('touchend', (e) => {
+    onGesture(e);
     if (touchStartX === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartX;
-    touchStartX = null;
-    if (Math.abs(deltaX) < 40) return;
+    const wasHorizontal = swipeAxis === 'x';
+    resetTouch();
+    if (!wasHorizontal || Math.abs(deltaX) < SWIPE_MIN_PX) return;
     goToCard(currentIndex + (deltaX < 0 ? 1 : -1));
   }, { passive: true });
 
+  window.addEventListener('touchcancel', resetTouch, { passive: true });
+
   window.addEventListener('keydown', (e) => {
-    ensureAudioPlaying();
+    onGesture(e);
     if (e.key === 'ArrowRight') goToCard(currentIndex + 1);
     if (e.key === 'ArrowLeft') goToCard(currentIndex - 1);
   });
 
-  // ---------- background audio: autoplay + fade in ----------
+  // ---------- background audio: gentle fade-in, user-controlled mute ----------
   const bgAudio = document.getElementById('bgAudio');
+  const muteBtn = document.getElementById('muteBtn');
   const AMBIENT_TARGET_VOLUME = 0.35;
   const FADE_IN_MS = 2500;
-  let audioStarted = false;
+  const FADE_OUT_MS = 400;
 
-  function fadeInAudio(audio, target, duration){
-    audio.volume = 0;
-    const steps = 30;
+  let userMuted = false;          // true after the user presses mute; blocks auto-start until they unmute
+  let resumeWhenVisible = false;  // audio was playing when the tab was hidden
+  let fadeTimer = null;
+
+  function setMuteUI(on){
+    muteBtn.classList.toggle('is-on', on);
+    muteBtn.setAttribute('aria-label', on ? 'Mute sound' : 'Unmute sound');
+  }
+  setMuteUI(false);
+  bgAudio.addEventListener('play', () => setMuteUI(!userMuted));
+  bgAudio.addEventListener('pause', () => setMuteUI(false));
+
+  function fadeTo(target, duration, done){
+    clearInterval(fadeTimer);
+    const from = bgAudio.volume;
+    const steps = 20;
     const stepTime = duration / steps;
     let count = 0;
-    const iv = setInterval(() => {
+    fadeTimer = setInterval(() => {
       count++;
-      audio.volume = Math.min(target, (target * count) / steps);
-      if (count >= steps) clearInterval(iv);
+      bgAudio.volume = Math.max(0, Math.min(1, from + (target - from) * count / steps));
+      if (count >= steps){
+        clearInterval(fadeTimer);
+        if (done) done();
+      }
     }, stepTime);
   }
 
-  function ensureAudioPlaying(){
-    if (audioStarted) return;
-    bgAudio.volume = 0;
-    bgAudio.play()
-      .then(() => { audioStarted = true; fadeInAudio(bgAudio, AMBIENT_TARGET_VOLUME, FADE_IN_MS); })
-      .catch(() => { /* still blocked; next interaction will retry */ });
+  function startAudio(){
+    if (bgAudio.paused) bgAudio.volume = 0;
+    const p = bgAudio.play();
+    const ramp = () => fadeTo(AMBIENT_TARGET_VOLUME, FADE_IN_MS);
+    if (p && typeof p.then === 'function'){
+      p.then(ramp).catch(() => setMuteUI(false));   // still blocked; next gesture retries
+    } else {
+      ramp();
+    }
   }
+
+  function ensureAudioPlaying(){
+    if (userMuted || !bgAudio.paused) return;
+    startAudio();
+  }
+
+  // any first tap/key/scroll may start audio, except presses on the mute button itself
+  function onGesture(e){
+    if (e && e.target instanceof Element && e.target.closest('#muteBtn')) return;
+    ensureAudioPlaying();
+  }
+
+  muteBtn.addEventListener('click', () => {
+    const playingNow = !userMuted && !bgAudio.paused;
+    if (playingNow){
+      userMuted = true;
+      setMuteUI(false);
+      fadeTo(0, FADE_OUT_MS, () => bgAudio.pause());
+    } else {
+      userMuted = false;
+      setMuteUI(true);
+      startAudio();
+    }
+  });
+
+  // don't keep playing when the user leaves the tab or locks the phone
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){
+      resumeWhenVisible = !bgAudio.paused && !userMuted;
+      if (resumeWhenVisible) bgAudio.pause();
+    } else if (resumeWhenVisible){
+      resumeWhenVisible = false;
+      if (!userMuted) startAudio();
+    }
+  });
 
   // try immediately on page load (works if the browser allows it)
   ensureAudioPlaying();
-  // most browsers require a gesture first — this catches the first click/tap/key anywhere
+  // most browsers require a gesture first — this catches the first click/tap anywhere
   ['pointerdown', 'click'].forEach(evt => {
-    window.addEventListener(evt, ensureAudioPlaying, { once: true });
+    window.addEventListener(evt, onGesture);
   });
 </script>
 
