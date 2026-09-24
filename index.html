@@ -50,43 +50,46 @@
     z-index:5;
   }
 
-  .starfield{
+  /* slow falling rose petals: outer span falls, inner span sways and flutters */
+  .petals{
     position:fixed;
     inset:0;
-    z-index:1;
+    z-index:0;   /* below the quote cards so petals never cross the text */
     pointer-events:none;
     overflow:hidden;
   }
-  .star-track{
+  .petal{
     position:absolute;
-    top:0; left:0;
-    width:200vw;
-    height:100%;
-    display:flex;
+    top:0;
+    left: var(--left, 50%);
+    width: var(--w, 14px);
+    height: calc(var(--w, 14px) * 1.3);
+    opacity: var(--op, 0.35);
     will-change: transform;
-    animation: driftRight 60s linear infinite;
+    animation: fall var(--fall, 18s) linear infinite;
+    animation-delay: var(--delay, 0s);
   }
-  .star-tile{
-    position:relative;
-    flex:0 0 100vw;
-    height:100%;
+  .petal i{
+    display:block;
+    width:100%; height:100%;
+    border-radius: 100% 0 100% 0;
+    background: linear-gradient(135deg, #cf98a2, var(--ember));
+    animation: sway var(--swayDur, 4.5s) ease-in-out infinite alternate;
+    animation-delay: var(--swayDelay, 0s);
   }
-  @keyframes driftRight{
-    from{ transform: translateX(-100vw); }
-    to{ transform: translateX(0); }
+  @keyframes fall{
+    from{ transform: translate3d(0, -40px, 0); }
+    to{ transform: translate3d(0, calc(100vh + 40px), 0); }
   }
-  .star{
-    position:absolute;
-    border-radius:50%;
-    background: var(--paper);
-    animation-name: twinkle;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
+  @supports (height:100dvh){
+    @keyframes fall{
+      from{ transform: translate3d(0, -40px, 0); }
+      to{ transform: translate3d(0, calc(100dvh + 40px), 0); }
+    }
   }
-  .star.accent{ background: var(--ember); }
-  @keyframes twinkle{
-    0%, 100%{ opacity: var(--min-op, 0.1); }
-    50%{ opacity: var(--max-op, 0.5); }
+  @keyframes sway{
+    from{ transform: translateX(calc(var(--sway, 24px) * -1)) rotate(-35deg) scaleX(0.7); }
+    to{ transform: translateX(var(--sway, 24px)) rotate(35deg) scaleX(1); }
   }
 
   .topbar{
@@ -174,16 +177,6 @@
     color: var(--ember);
   }
 
-  .quote-mark{
-    font-family: var(--serif);
-    font-style:italic;
-    font-weight:700;
-    font-size:2.8rem;
-    color: var(--ember);
-    line-height:1;
-    margin:0 0 0.5rem 0;
-    opacity:0.7;
-  }
   .quote-text{
     font-family: var(--serif);
     font-style:italic;
@@ -318,7 +311,6 @@
   @media (max-width:600px){
     .quote-inner{ max-width:340px; padding:2.2rem 1.7rem; }
     .quote-text{ font-size:1.15rem; line-height:1.55; }
-    .quote-mark{ font-size:2rem; }
     .corner{ width:22px; height:22px; }
     .topbar{ padding:1.6rem 1.6rem 0.6rem; }
     /* arrows stay, but move to the bottom corners beside the dots */
@@ -337,7 +329,6 @@
     .topbar-title{ font-size:1.15rem; }
     .topbar-sub{ font-size:0.7rem; }
     .quote-inner{ padding:1.6rem 1.8rem; }
-    .quote-mark{ font-size:1.9rem; margin-bottom:0.2rem; }
     .quote-text{ font-size:1.15rem; line-height:1.4; margin-bottom:0.9rem; }
     .divider{ margin:0.2rem auto 0.9rem; }
     .progress{ bottom:0.8rem; }
@@ -346,10 +337,11 @@
     .tap-zone{ top:3.5rem; bottom:3rem; }
   }
 
-  /* motion sensitivity: no bouncing words, twinkling, panning, sliding or blur/zoom reveals */
+  /* motion sensitivity: no bouncing words, falling petals, sliding or blur/zoom reveals */
   @media (prefers-reduced-motion: reduce){
-    .star-track{ animation:none; transform:none; will-change:auto; }
-    .star{ animation:none; opacity:0.3; }
+    /* petals stay still, scattered at faint random spots */
+    .petal{ animation:none; will-change:auto; top: var(--y, 50%); }
+    .petal i{ animation:none; transform: rotate(20deg); }
     .quote-text .word{ animation:none; }
     .track{ transition:none; }
     .quote-inner,
@@ -380,12 +372,7 @@
   <source src="ambient.mp3" type="audio/mpeg">
 </audio>
 
-<div class="starfield">
-  <div class="star-track" id="starTrack">
-    <div class="star-tile" id="tile1"></div>
-    <div class="star-tile" id="tile2"></div>
-  </div>
-</div>
+<div class="petals" id="petals" aria-hidden="true"></div>
 
 <div class="topbar">
   <p class="topbar-title">Lesson</p>
@@ -415,35 +402,30 @@
 <div class="track" id="track">
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-mark">"</p>
       <p class="quote-text">I didn't fall for you all at once. I fell a little more every time you stayed.</p>
       <p class="quote-attr">lesson, i</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-mark">"</p>
       <p class="quote-text">You were never a chapter. You were the reason I kept turning pages.</p>
       <p class="quote-attr">lesson, ii</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-mark">"</p>
       <p class="quote-text">Some hearts don't need promises. They just need someone who keeps showing up.</p>
       <p class="quote-attr">lesson, iii</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-mark">"</p>
       <p class="quote-text">Home was never a place. It was the sound of your voice on an ordinary evening.</p>
       <p class="quote-attr">lesson, iv</p>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-mark">"</p>
       <p class="quote-text">If loving you was a lesson, I never wanted to graduate.</p>
       <p class="quote-attr">lesson, v</p>
     </div>
@@ -454,39 +436,25 @@
 <p class="hint"><span class="desk">swipe or scroll →</span><span class="touch">swipe or tap →</span></p>
 
 <script>
-  (function spawnStars(){
-    const tile1 = document.getElementById('tile1');
-    const tile2 = document.getElementById('tile2');
-    const count = 60;
-
-    function makeStar(cfg){
-      const s = document.createElement('span');
-      s.className = 'star' + (cfg.accent ? ' accent' : '');
-      s.style.width = cfg.size + 'px';
-      s.style.height = cfg.size + 'px';
-      // % of the tile (not vh/vw) so stars follow the dynamic viewport height
-      s.style.top = cfg.top + '%';
-      s.style.left = cfg.left + '%';
-      s.style.setProperty('--min-op', cfg.minOp);
-      s.style.setProperty('--max-op', cfg.maxOp);
-      s.style.animationDuration = cfg.dur + 's';
-      s.style.animationDelay = cfg.delay + 's';
-      return s;
-    }
+  (function spawnPetals(){
+    const field = document.getElementById('petals');
+    const count = 8;   // few and slow: calm on the eyes and on low-end Android
 
     for (let i = 0; i < count; i++){
-      const cfg = {
-        accent: Math.random() < 0.12,
-        size: (Math.random() * 2 + 1).toFixed(1),
-        top: (Math.random() * 100).toFixed(1),
-        left: (Math.random() * 100).toFixed(1),
-        minOp: (0.06 + Math.random() * 0.12).toFixed(2),
-        maxOp: (0.3 + Math.random() * 0.35).toFixed(2),
-        dur: (3 + Math.random() * 5).toFixed(1),
-        delay: (Math.random() * 6).toFixed(1)
-      };
-      tile1.appendChild(makeStar(cfg));
-      tile2.appendChild(makeStar(cfg));
+      const fall = 14 + Math.random() * 10;           // seconds to cross the screen
+      const petal = document.createElement('span');
+      petal.className = 'petal';
+      petal.style.setProperty('--left', (Math.random() * 96).toFixed(1) + '%');
+      petal.style.setProperty('--w', (11 + Math.random() * 8).toFixed(1) + 'px');
+      petal.style.setProperty('--op', (0.22 + Math.random() * 0.28).toFixed(2));
+      petal.style.setProperty('--fall', fall.toFixed(1) + 's');
+      petal.style.setProperty('--delay', (-Math.random() * fall).toFixed(1) + 's');   // negative = already mid-fall on load
+      petal.style.setProperty('--sway', (14 + Math.random() * 26).toFixed(0) + 'px');
+      petal.style.setProperty('--swayDur', (3.5 + Math.random() * 3).toFixed(1) + 's');
+      petal.style.setProperty('--swayDelay', (-Math.random() * 4).toFixed(1) + 's');
+      petal.style.setProperty('--y', (8 + Math.random() * 84).toFixed(0) + '%');     // used only for reduced motion
+      petal.appendChild(document.createElement('i'));
+      field.appendChild(petal);
     }
   })();
 
