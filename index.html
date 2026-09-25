@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#f4ede0">
 <title>Lesson — Quotes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%80%3C/text%3E%3C/svg%3E">
+<meta name="description" content="Five small lessons, one quiet page.">
+<meta property="og:title" content="Lesson">
+<meta property="og:description" content="Five small lessons, one quiet page.">
+<meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&display=swap" rel="stylesheet">
@@ -198,6 +203,7 @@
     font-size:0.8rem;
     letter-spacing:0.06em;
     color: var(--paper-dim);
+    margin:0;
   }
   .quote-attr::before{
     content:"— ";
@@ -214,13 +220,39 @@
   }
   .dot{
     width:6px; height:6px;
+    padding:10px;           /* larger invisible tap target than the visible dot */
+    margin:-10px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    pointer-events:auto;    /* re-enable clicks; .progress itself stays pointer-events:none */
+  }
+  .dot::before{
+    content:"";
+    display:block;
+    width:6px; height:6px;
     border-radius:50%;
     background: var(--ember-dim);
     transition: background 0.3s ease, transform 0.3s ease;
   }
-  .dot.active{
+  .dot.active::before{
     background: var(--ember);
     transform: scale(1.3);
+  }
+  .dot:focus-visible{
+    outline:2px solid var(--ember);
+    outline-offset:2px;
+    border-radius:50%;
+  }
+
+  .sr-only{
+    position:absolute;
+    width:1px; height:1px;
+    padding:0; margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
   }
 
   .hint{
@@ -309,9 +341,15 @@
   }
 
   @media (max-width:600px){
-    .quote-inner{ max-width:340px; padding:2.2rem 1.7rem; }
-    .quote-text{ font-size:1.15rem; line-height:1.55; }
-    .corner{ width:22px; height:22px; }
+    .quote-card{ padding: 2rem 0.8rem; }
+    .quote-inner{
+      max-width: 96vw;
+      width: 100%;
+      padding: 1.4rem 2rem;
+    }
+    .quote-text{ font-size:1.05rem; line-height:1.45; margin-bottom:1rem; }
+    .quote-attr{ font-size:0.72rem; }
+    .corner{ width:20px; height:20px; }
     .topbar{ padding:1.6rem 1.6rem 0.6rem; }
     /* arrows stay, but move to the bottom corners beside the dots */
     .arrow{
@@ -370,6 +408,7 @@
 
 <audio id="bgAudio" loop preload="auto">
   <source src="ambient.mp3" type="audio/mpeg">
+  Your browser doesn't support background audio playback.
 </audio>
 
 <div class="petals" id="petals" aria-hidden="true"></div>
@@ -402,38 +441,39 @@
 <div class="track" id="track">
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-text">I didn't fall for you all at once. I fell a little more every time you stayed.</p>
-      <p class="quote-attr">lesson, i</p>
+      <blockquote class="quote-text">I didn't fall for you all at once. I fell a little more every time you stayed.</blockquote>
+      <footer class="quote-attr">lesson, i</footer>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-text">You were never a chapter. You were the reason I kept turning pages.</p>
-      <p class="quote-attr">lesson, ii</p>
+      <blockquote class="quote-text">You were never a chapter. You were the reason I kept turning pages.</blockquote>
+      <footer class="quote-attr">lesson, ii</footer>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-text">Some hearts don't need promises. They just need someone who keeps showing up.</p>
-      <p class="quote-attr">lesson, iii</p>
+      <blockquote class="quote-text">Some hearts don't need promises. They just need someone who keeps showing up.</blockquote>
+      <footer class="quote-attr">lesson, iii</footer>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-text">Home was never a place. It was the sound of your voice on an ordinary evening.</p>
-      <p class="quote-attr">lesson, iv</p>
+      <blockquote class="quote-text">Home was never a place. It was the sound of your voice on an ordinary evening.</blockquote>
+      <footer class="quote-attr">lesson, iv</footer>
     </div>
   </div>
   <div class="quote-card">
     <div class="quote-inner">
-      <p class="quote-text">If loving you was a lesson, I never wanted to graduate.</p>
-      <p class="quote-attr">lesson, v</p>
+      <blockquote class="quote-text">If loving you was a lesson, I never wanted to graduate.</blockquote>
+      <footer class="quote-attr">lesson, v</footer>
     </div>
   </div>
 </div>
 
 <div class="progress" id="progress"></div>
 <p class="hint"><span class="desk">swipe or scroll →</span><span class="touch">swipe or tap →</span></p>
+<p class="sr-only" id="srStatus" role="status" aria-live="polite"></p>
 
 <script>
   (function spawnPetals(){
@@ -503,51 +543,112 @@
   document.querySelectorAll('.quote-inner').forEach(decorateCard);
 
   const track = document.getElementById('track');
-  const cards = Array.from(document.querySelectorAll('.quote-card'));
+  const realCards = Array.from(document.querySelectorAll('.quote-card'));
+  const N = realCards.length;
   const progress = document.getElementById('progress');
   const arrowLeft = document.getElementById('arrowLeft');
   const arrowRight = document.getElementById('arrowRight');
   const tapLeft = document.getElementById('tapLeft');
   const tapRight = document.getElementById('tapRight');
+  const srStatus = document.getElementById('srStatus');
 
-  cards.forEach((_, i) => {
-    const dot = document.createElement('span');
+  // clone the last and first cards and park them at each end of the track.
+  // stepping past a real edge lands on a clone that looks identical, then we
+  // silently snap (no transition) back to the matching real card — so the
+  // loop reads as seamless instead of a long rewind across every quote.
+  const ghostStart = realCards[N - 1].cloneNode(true);
+  const ghostEnd = realCards[0].cloneNode(true);
+  ghostStart.setAttribute('aria-hidden', 'true');
+  ghostEnd.setAttribute('aria-hidden', 'true');
+  track.insertBefore(ghostStart, realCards[0]);
+  track.appendChild(ghostEnd);
+  const slides = Array.from(track.children);   // [ghostStart, real 0..N-1, ghostEnd]
+
+  realCards.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
     dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Go to quote ' + (i + 1) + ' of ' + N);
+    dot.addEventListener('click', () => goToIndex(i));
     progress.appendChild(dot);
   });
   const dots = Array.from(document.querySelectorAll('.dot'));
 
-  let currentIndex = 0;
+  let pos = 1;           // index into `slides`; 1..N are the real cards
   let isLocked = false;
   const LOCK_MS = 900;
 
-  function goToCard(index){
-    if (isLocked) return;
-    const clamped = Math.max(0, Math.min(cards.length - 1, index));
-    if (clamped === currentIndex) return;
-
-    isLocked = true;
-    currentIndex = clamped;
-
-    cards.forEach(c => c.classList.remove('in-view'));
-    track.style.transform = 'translateX(' + (-currentIndex * 100) + 'vw)';
-    dots.forEach(d => d.classList.remove('active'));
-    dots[currentIndex].classList.add('active');
-
-    setTimeout(() => {
-      cards[currentIndex].classList.add('in-view');
-    }, 250);
-
-    setTimeout(() => { isLocked = false; }, LOCK_MS);
+  function realIndexFor(p){
+    return ((p - 1) % N + N) % N;
   }
 
-  // reveal the first card on load
-  cards[0].classList.add('in-view');
+  function setActive(p, revealDelay, silent){
+    slides.forEach(s => s.classList.remove('in-view'));
+    const idx = realIndexFor(p);
+    dots.forEach(d => d.classList.remove('active'));
+    dots[idx].classList.add('active');
+    srStatus.textContent = 'Quote ' + (idx + 1) + ' of ' + N;
+    // only the real card the person can actually land on should be exposed
+    // to screen readers; the clones and off-screen quotes stay hidden
+    realCards.forEach((c, i) => c.setAttribute('aria-hidden', i === idx ? 'false' : 'true'));
 
-  arrowLeft.addEventListener('click', () => goToCard(currentIndex - 1));
-  arrowRight.addEventListener('click', () => goToCard(currentIndex + 1));
-  tapLeft.addEventListener('click', () => goToCard(currentIndex - 1));
-  tapRight.addEventListener('click', () => goToCard(currentIndex + 1));
+    const reveal = () => {
+      if (silent){
+        // the matching clone already played this fade-in a moment ago —
+        // show the real card already-revealed instead of fading it in again
+        const inner = slides[p].querySelector('.quote-inner');
+        inner.style.transition = 'none';
+        slides[p].classList.add('in-view');
+        void inner.offsetWidth;   // force layout before restoring the transition
+        inner.style.transition = '';
+      } else {
+        slides[p].classList.add('in-view');
+      }
+    };
+
+    if (revealDelay > 0){
+      setTimeout(reveal, revealDelay);
+    } else {
+      reveal();
+    }
+  }
+
+  function applyPosition(p, instant, silent){
+    if (instant) track.style.transition = 'none';
+    pos = p;
+    track.style.transform = 'translateX(' + (-pos * 100) + 'vw)';
+    setActive(p, instant ? 0 : 250, silent);
+    if (instant){
+      void track.offsetWidth;   // force layout so transition:none is applied before we restore it
+      track.style.transition = '';
+    }
+  }
+
+  function moveTo(target){
+    if (isLocked) return;
+    isLocked = true;
+    applyPosition(target, false);
+    setTimeout(() => {
+      if (pos === 0){
+        applyPosition(N, true, true);       // snap silently from the ghost-start clone to the real last quote
+      } else if (pos === N + 1){
+        applyPosition(1, true, true);       // snap silently from the ghost-end clone to the real first quote
+      }
+      isLocked = false;
+    }, LOCK_MS);
+  }
+
+  function step(delta){ moveTo(pos + delta); }
+  function goToIndex(i){ moveTo(i + 1); }   // dots always land on a real card, never a clone
+
+  // reveal the first card on load, positioned past the ghost-start clone
+  // (not silent — this one should still play its cinematic fade-in)
+  applyPosition(1, true, false);
+
+  arrowLeft.addEventListener('click', () => step(-1));
+  arrowRight.addEventListener('click', () => step(1));
+  tapLeft.addEventListener('click', () => step(-1));
+  tapRight.addEventListener('click', () => step(1));
 
   // one wheel "stroke" moves exactly one card — no skipping ahead
   let wheelCooldown = false;
@@ -558,7 +659,7 @@
     const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
     if (Math.abs(delta) < 8) return;
     wheelCooldown = true;
-    goToCard(currentIndex + (delta > 0 ? 1 : -1));
+    step(delta > 0 ? 1 : -1);
     setTimeout(() => { wheelCooldown = false; }, LOCK_MS);
   }, { passive: false });
 
@@ -598,15 +699,15 @@
     const wasHorizontal = swipeAxis === 'x';
     resetTouch();
     if (!wasHorizontal || Math.abs(deltaX) < SWIPE_MIN_PX) return;
-    goToCard(currentIndex + (deltaX < 0 ? 1 : -1));
+    step(deltaX < 0 ? 1 : -1);
   }, { passive: true });
 
   window.addEventListener('touchcancel', resetTouch, { passive: true });
 
   window.addEventListener('keydown', (e) => {
     onGesture(e);
-    if (e.key === 'ArrowRight') goToCard(currentIndex + 1);
-    if (e.key === 'ArrowLeft') goToCard(currentIndex - 1);
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
   });
 
   // ---------- background audio: gentle fade-in, user-controlled mute ----------
