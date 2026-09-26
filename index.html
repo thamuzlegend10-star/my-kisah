@@ -102,11 +102,15 @@
     position:fixed;
     top:0; left:0; right:0;
     width:100%;
-    height: clamp(90px, 15vw, 190px);
+    height: clamp(140px, 20vw, 260px);
     z-index:1;          /* above the petals, still well below the topbar/UI (z-index:10+) */
     pointer-events:none;
     overflow:hidden;
     opacity:0.95;
+    /* light fade only right at the very edge, as a safety net for ultra-wide
+       screens — most of the canopy now fits within the taller box uncropped */
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 0%, black 88%, transparent 100%);
   }
   .canopy svg{ display:block; width:100%; height:100%; }
 
@@ -364,7 +368,7 @@
     .quote-attr{ font-size:0.72rem; }
     .corner{ width:20px; height:20px; }
     .topbar{ padding:1.6rem 1.6rem 0.6rem; }
-    .canopy{ height: clamp(70px, 22vw, 130px); }
+    .canopy{ height: clamp(110px, 30vw, 180px); }
     /* arrows stay, but move to the bottom corners beside the dots */
     .arrow{
       top:auto;
@@ -387,7 +391,7 @@
     .hint{ bottom:2rem; }
     .mute-btn{ top:0.6rem; right:0.8rem; }
     .tap-zone{ top:3.5rem; bottom:3rem; }
-    .canopy{ height: clamp(56px, 13vw, 80px); }
+    .canopy{ height: clamp(80px, 18vw, 110px); }
   }
 
   /* motion sensitivity: no bouncing words, falling petals, sliding or blur/zoom reveals */
